@@ -1,0 +1,38 @@
+{
+  "name": "field-starter",
+  "version": "1.0.0",
+  "description": "- Run `npm install` to install dependencies - Run `npm start` to start server - Run `npm run dev` to test execute function",
+  "main": "index.js",
+  "scripts": {
+    "start": "block-basekit-cli start:field",
+    "build": "block-basekit-cli build:field",
+    "pack": "block-basekit-cli pack:field",
+    "dev": "block-basekit-cli dev:field",
+    "pack:attachment": "cp src/index-attachment.ts src/index.ts && block-basekit-cli pack:field",
+    "pack:status": "cp src/index-status.ts src/index.ts && block-basekit-cli pack:field",
+    "start:attachment": "cp src/index-attachment.ts src/index.ts && block-basekit-cli start:field",
+    "start:status": "cp src/index-status.ts src/index.ts && block-basekit-cli start:field"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@lark-opdev/block-basekit-cli": "1.0.5",
+    "@types/node": "^25.5.0",
+    "typescript": "^6.0.2"
+  },
+  "dependencies": {
+    "@lark-opdev/block-basekit-server-api": "1.0.6"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lark-Base-Team/field-demo.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/Lark-Base-Team/field-demo/issues"
+  },
+  "homepage": "https://github.com/Lark-Base-Team/field-demo#readme"
+}
