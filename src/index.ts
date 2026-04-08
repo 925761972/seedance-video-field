@@ -31,10 +31,12 @@ basekit.addField({
         'model_label': '模型',
         'prompt_label': '文本提示词',
         'prompt_placeholder': '描述你想要生成的视频内容',
-        'image_label': '参考图片列（图生视频/全能参考需选择）',
+        'image_label': '参考图片列 1（图生视频/全能参考需选择）',
         'image_placeholder': '选择表格中的附件列',
-        'video_label': '参考视频列（视频参考/全能参考需选择）',
+        'image2_label': '参考图片列 2（可选）',
+        'video_label': '参考视频列 1（视频参考/全能参考需选择）',
         'video_placeholder': '选择表格中的附件列',
+        'video2_label': '参考视频列 2（可选）',
         'resolution_label': '分辨率',
         'ratio_label': '宽高比',
         'duration_label': '视频时长',
@@ -56,10 +58,12 @@ basekit.addField({
         'model_label': 'Model',
         'prompt_label': 'Text Prompt',
         'prompt_placeholder': 'Describe the video you want to generate',
-        'image_label': 'Image Column (for I2V/Multimodal)',
+        'image_label': 'Image Column 1 (for I2V/Multimodal)',
         'image_placeholder': 'Select attachment column',
-        'video_label': 'Video Column (for V2V/Multimodal)',
+        'image2_label': 'Image Column 2 (optional)',
+        'video_label': 'Video Column 1 (for V2V/Multimodal)',
         'video_placeholder': 'Select attachment column',
+        'video2_label': 'Video Column 2 (optional)',
         'resolution_label': 'Resolution',
         'ratio_label': 'Aspect Ratio',
         'duration_label': 'Duration',
@@ -119,8 +123,22 @@ basekit.addField({
       validator: { required: false },
     },
     {
+      key: 'imageField2',
+      label: t('image2_label'),
+      component: FieldComponent.FieldSelect,
+      props: { supportType: [FieldType.Attachment] },
+      validator: { required: false },
+    },
+    {
       key: 'videoField',
       label: t('video_label'),
+      component: FieldComponent.FieldSelect,
+      props: { supportType: [FieldType.Attachment] },
+      validator: { required: false },
+    },
+    {
+      key: 'videoField2',
+      label: t('video2_label'),
       component: FieldComponent.FieldSelect,
       props: { supportType: [FieldType.Attachment] },
       validator: { required: false },
@@ -243,6 +261,27 @@ basekit.addField({
       }
 
       log({ '===提取的promptText': promptText.slice(0, 200) });
+
+      // ====== @标签替换：支持在提示词中精确引用参考素材 ======
+      // 用户可以在提示词中使用 @图片1 @图片2 @图片3 @视频1 @视频2 @视频3 来引用不同列的素材
+      // 替换为描述性标记，方便用户理解对应关系
+      // 注意：Seedance API 通过 content 数组中素材的顺序来匹配引用
+      // 因此素材必须按 列1→列2→列3 的顺序传入（已在 createTask.ts 中保证）
+      const tagMap: Record<string, string> = {
+        '@图片1': '[参考图片1]', '@图片2': '[参考图片2]', '@图片3': '[参考图片3]',
+        '@视频1': '[参考视频1]', '@视频2': '[参考视频2]', '@视频3': '[参考视频3]',
+        '@image1': '[参考图片1]', '@image2': '[参考图片2]', '@image3': '[参考图片3]',
+        '@video1': '[参考视频1]', '@video2': '[参考视频2]', '@video3': '[参考视频3]',
+      };
+      let processedPrompt = promptText;
+      for (const [tag, replacement] of Object.entries(tagMap)) {
+        const escapedTag = tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        processedPrompt = processedPrompt.replace(new RegExp(escapedTag, 'g'), replacement);
+      }
+      if (processedPrompt !== promptText) {
+        log({ '===@标签替换': { original: promptText.slice(0, 200), processed: processedPrompt.slice(0, 200) } });
+        promptText = processedPrompt;
+      }
 
       // 空内容检查
       if (!promptText.trim()) {

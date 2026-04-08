@@ -14,6 +14,29 @@ const MAX_CREATE_RETRIES = 2;
 const RETRY_DELAY_MS = 3000;
 
 /**
+ * 合并多个附件字段的附件数据
+ * 将 imageField / imageField2 / imageField3 等多个字段的数据合并为一个数组
+ * @param params - 表单参数对象
+ * @param fieldKeys - 要合并的字段名数组
+ * @returns 合并后的附件数组
+ */
+function mergeAttachmentFields(params: FormItemParams, fieldKeys: string[]): any[] {
+  const merged: any[] = [];
+  for (const key of fieldKeys) {
+    const fieldData = (params as any)[key];
+    if (Array.isArray(fieldData) && fieldData.length > 0) {
+      merged.push(...fieldData);
+    }
+  }
+  return merged;
+}
+
+/** 图片相关的所有字段名 */
+const IMAGE_FIELD_KEYS = ['imageField', 'imageField2', 'imageField3'];
+/** 视频相关的所有字段名 */
+const VIDEO_FIELD_KEYS = ['videoField', 'videoField2', 'videoField3'];
+
+/**
  * 构建 content 数组（根据生成模式组装 text + image_url / video_url）
  * 核心改进：所有飞书附件先下载转 base64，再传给 API
  * 这样解决了飞书内部 URL 无法被火山引擎 API 访问的问题
@@ -44,7 +67,8 @@ export async function buildContent(
 
   // ====== image2video_first 模式：首帧图片 ======
   if (mode === 'image2video_first') {
-    const imageAttachments = extractImageAttachments(params.imageField).slice(0, 1);
+    const allImages = mergeAttachmentFields(params, IMAGE_FIELD_KEYS);
+    const imageAttachments = extractImageAttachments(allImages).slice(0, 1);
     if (imageAttachments.length > 0) {
       const base64Uris = await batchDownloadAndEncode(imageAttachments, rawFetch, 1, debugLog);
       if (base64Uris.length > 0) {
@@ -60,7 +84,8 @@ export async function buildContent(
 
   // ====== image2video_ref 模式：参考图片（1-4 张） ======
   if (mode === 'image2video_ref') {
-    const imageAttachments = extractImageAttachments(params.imageField).slice(0, 4);
+    const allImages = mergeAttachmentFields(params, IMAGE_FIELD_KEYS);
+    const imageAttachments = extractImageAttachments(allImages).slice(0, 4);
     if (imageAttachments.length > 0) {
       const base64Uris = await batchDownloadAndEncode(imageAttachments, rawFetch, 4, debugLog);
       base64Uris.forEach((uri) => {
@@ -78,7 +103,8 @@ export async function buildContent(
   // 注意：Seedance API 要求 video_url 必须是公网可访问的 web URL，不支持 base64
   // 因此需要下载飞书附件 → 上传到临时文件托管 → 获取公网 URL
   if (mode === 'video2video') {
-    const videoAttachments = extractVideoAttachments(params.videoField).slice(0, 3);
+    const allVideos = mergeAttachmentFields(params, VIDEO_FIELD_KEYS);
+    const videoAttachments = extractVideoAttachments(allVideos).slice(0, 3);
     if (videoAttachments.length > 0) {
       const publicUrls = await batchDownloadAndUploadVideos(videoAttachments, rawFetch, 3, debugLog);
       publicUrls.forEach((url) => {
@@ -94,8 +120,9 @@ export async function buildContent(
 
   // ====== multimodal 模式：全能参考（文本 + 图片 + 视频） ======
   if (mode === 'multimodal') {
-    // 添加图片参考（图片支持 base64）
-    const imageAttachments = extractImageAttachments(params.imageField).slice(0, 9);
+    // 添加图片参考（图片支持 base64）— 合并所有图片列
+    const allImages = mergeAttachmentFields(params, IMAGE_FIELD_KEYS);
+    const imageAttachments = extractImageAttachments(allImages).slice(0, 9);
     if (imageAttachments.length > 0) {
       const imageBase64Uris = await batchDownloadAndEncode(imageAttachments, rawFetch, 9, debugLog);
       imageBase64Uris.forEach((uri) => {
@@ -106,8 +133,9 @@ export async function buildContent(
         });
       });
     }
-    // 添加视频参考（视频必须用公网 URL，不支持 base64）
-    const videoAttachments = extractVideoAttachments(params.videoField).slice(0, 3);
+    // 添加视频参考（视频必须用公网 URL，不支持 base64）— 合并所有视频列
+    const allVideos = mergeAttachmentFields(params, VIDEO_FIELD_KEYS);
+    const videoAttachments = extractVideoAttachments(allVideos).slice(0, 3);
     if (videoAttachments.length > 0) {
       const videoPublicUrls = await batchDownloadAndUploadVideos(videoAttachments, rawFetch, 3, debugLog);
       videoPublicUrls.forEach((url) => {
@@ -204,26 +232,31 @@ export function validateParams(params: FormItemParams): string | null {
 
   // 图生视频-首帧：需要图片附件
   if (params.mode === 'image2video_first') {
-    const imageAttachments = extractImageAttachments(params.imageField);
+    const allImages = mergeAttachmentFields(params, IMAGE_FIELD_KEYS);
+    const imageAttachments = extractImageAttachments(allImages);
     if (imageAttachments.length === 0) return '图生视频（首帧）模式需要所选列中有图片附件';
   }
 
   // 图生视频-参考图：需要图片附件
   if (params.mode === 'image2video_ref') {
-    const imageAttachments = extractImageAttachments(params.imageField);
+    const allImages = mergeAttachmentFields(params, IMAGE_FIELD_KEYS);
+    const imageAttachments = extractImageAttachments(allImages);
     if (imageAttachments.length === 0) return '图生视频（参考图）模式需要所选列中有图片附件';
   }
 
   // 视频参考：需要视频附件
   if (params.mode === 'video2video') {
-    const videoAttachments = extractVideoAttachments(params.videoField);
+    const allVideos = mergeAttachmentFields(params, VIDEO_FIELD_KEYS);
+    const videoAttachments = extractVideoAttachments(allVideos);
     if (videoAttachments.length === 0) return '视频参考模式需要所选列中有视频附件';
   }
 
   // 全能参考：至少有图片或视频
   if (params.mode === 'multimodal') {
-    const hasImages = extractImageAttachments(params.imageField).length > 0;
-    const hasVideos = extractVideoAttachments(params.videoField).length > 0;
+    const allImages = mergeAttachmentFields(params, IMAGE_FIELD_KEYS);
+    const allVideos = mergeAttachmentFields(params, VIDEO_FIELD_KEYS);
+    const hasImages = extractImageAttachments(allImages).length > 0;
+    const hasVideos = extractVideoAttachments(allVideos).length > 0;
     if (!hasImages && !hasVideos) {
       return '全能参考模式需要所选列中有图片或视频附件';
     }

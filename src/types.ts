@@ -13,8 +13,16 @@ export interface FormItemParams {
   prompt: string;
   /** 参考图片附件数组（FieldSelect 选择附件列后，飞书直接传入该列的附件数据） */
   imageField: any[];
+  /** 参考图片列 2（可选，用于选择多个不同附件列） */
+  imageField2?: any[];
+  /** 参考图片列 3（可选） */
+  imageField3?: any[];
   /** 参考视频附件数组（FieldSelect 选择附件列后，飞书直接传入该列的附件数据） */
   videoField: any[];
+  /** 参考视频列 2（可选） */
+  videoField2?: any[];
+  /** 参考视频列 3（可选） */
+  videoField3?: any[];
   /** 分辨率：480p / 720p / 1080p */
   resolution: string;
   /** 宽高比：16:9 / 4:3 / 1:1 / 3:4 / 9:16 / 21:9 / adaptive */
