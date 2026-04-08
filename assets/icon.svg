@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6C5CE7"/>
+      <stop offset="100%" stop-color="#0984E3"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="200" y1="120" x2="380" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#a29bfe"/>
+      <stop offset="100%" stop-color="#74b9ff"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="160" y1="80" x2="400" y2="320" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 圆角方形背景 -->
+  <rect x="32" y="32" width="448" height="448" rx="96" fill="url(#bg)"/>
+
+  <!-- 光泽层 -->
+  <rect x="32" y="32" width="448" height="240" rx="96" fill="url(#shine)"/>
+
+  <!-- 播放按钮三角 -->
+  <path d="M200 155 L200 357 L375 256 Z" fill="white" opacity="0.95"/>
+
+  <!-- AI 星光粒子 -->
+  <circle cx="392" cy="140" r="8" fill="white" opacity="0.9"/>
+  <circle cx="410" cy="170" r="4" fill="white" opacity="0.6"/>
+  <circle cx="375" cy="118" r="4.5" fill="white" opacity="0.7"/>
+  <circle cx="420" cy="138" r="3" fill="white" opacity="0.5"/>
+
+  <!-- AI 魔法线条 -->
+  <path d="M388 148 L408 128" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  <path d="M396 155 L418 150" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- 底部胶片装饰 -->
+  <rect x="120" y="370" width="272" height="36" rx="8" fill="white" opacity="0.15"/>
+  <rect x="132" y="376" width="16" height="24" rx="3" fill="white" opacity="0.3"/>
+  <rect x="156" y="376" width="16" height="24" rx="3" fill="white" opacity="0.3"/>
+  <rect x="180" y="376" width="16" height="24" rx="3" fill="white" opacity="0.3"/>
+  <rect x="316" y="376" width="16" height="24" rx="3" fill="white" opacity="0.3"/>
+  <rect x="340" y="376" width="16" height="24" rx="3" fill="white" opacity="0.3"/>
+  <rect x="364" y="376" width="16" height="24" rx="3" fill="white" opacity="0.3"/>
+</svg>
